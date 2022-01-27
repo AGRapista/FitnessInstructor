@@ -1,4 +1,4 @@
-# project
+# FitnessInstructor
 
 A new Flutter project.
 
