@@ -118,9 +118,12 @@ class _HomeState extends State<Home> {
 class RenderLandmarks extends CustomPainter {
   late List<dynamic> inferenceList;
   late PointMode pointMode;
-  var paint1 = Paint()
+  var point_paint = Paint()
     ..color = Colors.red
     ..strokeCap = StrokeCap.round
+    ..strokeWidth = 8;
+  var edge_paint = Paint()
+    ..color = Colors.orange
     ..strokeWidth = 5;
   List<Offset> points = [];
   List<dynamic> edges = [
@@ -149,19 +152,19 @@ class RenderLandmarks extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (List<dynamic> point in inferenceList) {
-      if (point[2] > 40) {
+      if (point[2] > 0.40) {
         points.add(Offset(point[0].toDouble() - 70, point[1].toDouble() - 30));
       }
     }
-    canvas.drawPoints(PointMode.points, points, paint1);
     for (List<int> edge in edges) {
       double vertex1X = inferenceList[edge[0]][0].toDouble() - 70;
       double vertex1Y = inferenceList[edge[0]][1].toDouble() - 30;
       double vertex2X = inferenceList[edge[1]][0].toDouble() - 70;
       double vertex2Y = inferenceList[edge[1]][1].toDouble() - 30;
       canvas.drawLine(
-          Offset(vertex1X, vertex1Y), Offset(vertex2X, vertex2Y), paint1);
+          Offset(vertex1X, vertex1Y), Offset(vertex2X, vertex2Y), edge_paint);
     }
+    canvas.drawPoints(PointMode.points, points, point_paint);
   }
 
   @override
