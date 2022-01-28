@@ -1,6 +1,6 @@
 # FitnessInstructor
 
-A new Flutter project.
+A fitness instructor app utilizing the MoveNet singlepose lightning model and the Flutter framework.
 
 ## Getting Started
 
