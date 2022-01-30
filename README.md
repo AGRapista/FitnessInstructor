@@ -1,6 +1,6 @@
 # FitnessInstructor
 
-A fitness instructor app utilizing the MoveNet singlepose lightning model and the Flutter framework.
+A fitness instructor app utilizing the MoveNet singlepose lightning model and the Flutter framework. (Still in active development)
 
 ## Getting Started
 
