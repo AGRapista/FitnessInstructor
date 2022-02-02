@@ -29,7 +29,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  tflite: ^1.1.2
   camera: ^0.9.4+5
   image: ^3.1.0
   tflite_flutter: ^0.9.0
