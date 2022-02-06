@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'components/appbar.dart';
+import 'home_components/appbar.dart';
+import 'home_components/continue_button.dart';
+import 'home_components/setup_button.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: CustomScrollView(slivers: <Widget>[
         SliverAppBar(
           title: MainAppBar(),
@@ -15,9 +17,12 @@ class Home extends StatelessWidget {
           expandedHeight: 200,
           shape: ContinuousRectangleBorder(
               borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(200),
-                  bottomRight: Radius.circular(200))),
-        )
+                  bottomLeft: Radius.circular(100),
+                  bottomRight: Radius.circular(100))),
+        ),
+        SliverList(
+            delegate: SliverChildListDelegate(
+                <Widget>[continue_button(), setup_button()]))
       ]),
     );
   }
