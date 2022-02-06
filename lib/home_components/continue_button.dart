@@ -17,7 +17,6 @@ class _continue_buttonState extends State<continue_button> {
           child: Center(
             child: Container(
               decoration: BoxDecoration(
-                  color: Colors.red[100],
                   borderRadius: BorderRadius.circular(30.0),
                   boxShadow: [
                     BoxShadow(
@@ -27,49 +26,62 @@ class _continue_buttonState extends State<continue_button> {
                       offset: Offset(0, 3),
                     )
                   ]),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30.0),
-                child: Container(
+              child: Stack(children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(30.0),
                   child: Container(
-                    height: 150,
-                    width: 300,
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 200,
-                          width: 250,
-                          child: Center(
-                            child: Text(
-                              "CONTINUE\nWORKOUT",
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold),
+                    child: Container(
+                      height: 150,
+                      width: 300,
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 200,
+                            width: 250,
+                            child: Center(
+                              child: Text(
+                                "CONTINUE\nWORKOUT",
+                                style: TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green[100],
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(100)),
                             ),
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.green[100],
-                            borderRadius: BorderRadius.only(
-                                bottomRight: Radius.circular(100)),
-                          ),
-                        ),
-                        Container()
-                      ],
+                          Container()
+                        ],
+                      ),
+                    ),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30.0)),
+                  ),
+                ),
+                Positioned(
+                  right: 30,
+                  top: 40,
+                  child: Container(
+                    child: Center(
+                      child: Image.asset(
+                        'assets/img/continue_icon.png',
+                        height: 40,
+                        width: 40,
+                      ),
+                    ),
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 3),
-                        )
-                      ]),
-                ),
-              ),
+                )
+              ]),
             ),
           ),
         ));
