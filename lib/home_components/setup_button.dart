@@ -71,8 +71,8 @@ class _setup_buttonState extends State<setup_button> {
                     child: Center(
                       child: Image.asset(
                         'assets/img/setup_icon.png',
-                        height: 40,
-                        width: 40,
+                        height: 36,
+                        width: 36,
                       ),
                     ),
                     decoration: BoxDecoration(
