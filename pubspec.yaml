@@ -68,6 +68,7 @@ flutter:
   - assets/img/shoulder_press_icon.png
   - assets/img/continue_icon.png
   - assets/img/setup_icon.png
+  - assets/img/add_icon.png
   
 
   # To add assets to your application, add an assets section, like this:
