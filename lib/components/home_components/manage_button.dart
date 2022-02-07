@@ -18,7 +18,7 @@ class _setup_buttonState extends State<setup_button> {
             context,
             PageRouteBuilder(
                 pageBuilder: (context, animation1, animation2) =>
-                    SetupWorkout(),
+                    ManageWorkout(),
                 transitionDuration: Duration(seconds: 0),
                 reverseTransitionDuration: Duration.zero),
           ),

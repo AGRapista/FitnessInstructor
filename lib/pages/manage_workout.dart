@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../components/appbar.dart';
+import 'setup_workouts.dart';
 
-class SetupWorkout extends StatefulWidget {
-  SetupWorkout({Key? key}) : super(key: key);
+class ManageWorkout extends StatefulWidget {
+  ManageWorkout({Key? key}) : super(key: key);
 
   @override
-  State<SetupWorkout> createState() => _SetupWorkoutState();
+  State<ManageWorkout> createState() => _ManageWorkoutState();
 }
 
-class _SetupWorkoutState extends State<SetupWorkout> {
+class _ManageWorkoutState extends State<ManageWorkout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +43,9 @@ class _SetupWorkoutState extends State<SetupWorkout> {
                 )
               ];
             },
-            body: Container()),
+            body: TabBarView(
+              children: [SetupWorkout(), SetupWorkout()],
+            )),
       ),
     );
   }
