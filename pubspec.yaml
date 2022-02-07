@@ -69,6 +69,10 @@ flutter:
   - assets/img/continue_icon.png
   - assets/img/setup_icon.png
   - assets/img/add_icon.png
+
+  - assets/img/card_dumbellcurl.png
+  - assets/img/card_shoulderpress.png
+  - assets/img/card_lateralraise.png 
   
 
   # To add assets to your application, add an assets section, like this:
