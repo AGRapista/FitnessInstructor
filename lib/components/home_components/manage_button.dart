@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../pages/manage_workout.dart';
 
 class setup_button extends StatefulWidget {
   setup_button({Key? key}) : super(key: key);
@@ -13,7 +14,14 @@ class _setup_buttonState extends State<setup_button> {
     return Container(
         margin: EdgeInsets.only(top: 20),
         child: InkWell(
-          onTap: null,
+          onTap: () => Navigator.push(
+            context,
+            PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) =>
+                    SetupWorkout(),
+                transitionDuration: Duration(seconds: 0),
+                reverseTransitionDuration: Duration.zero),
+          ),
           child: Center(
             child: Container(
               decoration: BoxDecoration(
@@ -40,7 +48,7 @@ class _setup_buttonState extends State<setup_button> {
                             width: 250,
                             child: Center(
                               child: Text(
-                                "SETUP\nWORKOUTS",
+                                "MANAGE\nWORKOUTS",
                                 style: TextStyle(
                                     fontFamily: 'Roboto',
                                     fontSize: 20,
