@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:isolate';
 
-import 'main.dart';
+import 'pages/main.dart';
 import 'utility/classifier.dart';
 import 'utility/isolate.dart';
 

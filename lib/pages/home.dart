@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'home_components/appbar.dart';
-import 'home_components/continue_button.dart';
-import 'home_components/setup_button.dart';
+import '../components/appbar.dart';
+import '../components/home_components/continue_button.dart';
+import '../components/home_components/setup_button.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);

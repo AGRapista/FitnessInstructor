@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project/home.dart';
+import 'package:project/pages/home.dart';
 import 'package:project/test.dart';
 import 'package:camera/camera.dart';
 
