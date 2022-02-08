@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:project/components/workout_components/exerciseItem.dart';
+import 'set_repetitions.dart';
+import '../components/workout_components/exerciseItem.dart';
+import '../components/workout_components/exerciseList.dart';
 
 class AddWorkout extends StatefulWidget {
   AddWorkout({Key? key}) : super(key: key);
@@ -11,9 +15,10 @@ class _AddWorkoutState extends State<AddWorkout> {
   late double card_height;
   late double card_width;
 
-  bool card1_selected = false;
-  bool card2_selected = false;
-  bool card3_selected = false;
+// Inefficient/ugly way of doing this, but for 3 selectable exercises, it would do
+// TODO (potentially): Change into dynamic exeercise selection
+
+  List<Exercise> includedExercises = [];
 
   @override
   void initState() {
@@ -25,19 +30,13 @@ class _AddWorkoutState extends State<AddWorkout> {
     print("\n hey\n" + card_height.toString());
   }
 
-  void onSelect(int card) {
+  void onSelect(Exercise? exercise) {
     setState(() {
-      switch (card) {
-        case 1:
-          card1_selected = !card1_selected;
-          break;
-        case 2:
-          card2_selected = !card2_selected;
-          break;
-        case 3:
-          card3_selected = !card3_selected;
-          break;
+      if (includedExercises.contains(exercise)) {
+        includedExercises.remove(exercise!);
+        return;
       }
+      includedExercises.add(exercise!);
     });
   }
 
@@ -63,9 +62,9 @@ class _AddWorkoutState extends State<AddWorkout> {
           children: [
             Positioned(
                 top: 50,
-                left: 90,
+                left: 40,
                 child: Text(
-                  'Select workouts',
+                  'Select exercises to include\n         in your workout',
                   style: TextStyle(fontFamily: 'Roboto', fontSize: 25),
                 )),
             Container(
@@ -77,7 +76,7 @@ class _AddWorkoutState extends State<AddWorkout> {
                     children: [
                       Container(
                         child: InkWell(
-                          onTap: () => onSelect(1),
+                          onTap: () => onSelect(Exercises["dumbell_curl"]),
                           child: Container(
                             child: Center(
                               child: Image.asset(
@@ -88,7 +87,8 @@ class _AddWorkoutState extends State<AddWorkout> {
                             ),
                           ),
                         ),
-                        decoration: card1_selected
+                        decoration: includedExercises
+                                .contains(Exercises["dumbell_curl"])
                             ? BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
                                 boxShadow: [
@@ -106,7 +106,7 @@ class _AddWorkoutState extends State<AddWorkout> {
                       ),
                       Container(
                         child: InkWell(
-                          onTap: () => onSelect(2),
+                          onTap: () => onSelect(Exercises["lateral_raise"]),
                           child: Center(
                             child: Image.asset(
                                 'assets/img/card_lateralraise.png',
@@ -114,7 +114,8 @@ class _AddWorkoutState extends State<AddWorkout> {
                                 width: card_width),
                           ),
                         ),
-                        decoration: card2_selected
+                        decoration: includedExercises
+                                .contains(Exercises["lateral_raise"])
                             ? BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
                                 boxShadow: [
@@ -138,7 +139,7 @@ class _AddWorkoutState extends State<AddWorkout> {
                     children: [
                       Container(
                         child: InkWell(
-                          onTap: () => onSelect(3),
+                          onTap: () => onSelect(Exercises["shoulder_press"]),
                           child: Center(
                             child: Image.asset(
                                 'assets/img/card_shoulderpress.png',
@@ -146,7 +147,8 @@ class _AddWorkoutState extends State<AddWorkout> {
                                 width: card_width),
                           ),
                         ),
-                        decoration: card3_selected
+                        decoration: includedExercises
+                                .contains(Exercises["shoulder_press"])
                             ? BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
                                 boxShadow: [
@@ -171,14 +173,18 @@ class _AddWorkoutState extends State<AddWorkout> {
                 bottom: 20,
                 right: 10,
                 child: FloatingActionButton(
-                    onPressed: () => Navigator.push(
-                          context,
-                          PageRouteBuilder(
-                              pageBuilder: (context, animation1, animation2) =>
-                                  AddWorkout(),
-                              transitionDuration: Duration(seconds: 0),
-                              reverseTransitionDuration: Duration.zero),
-                        ),
+                    onPressed: includedExercises.length != 0
+                        ? () => Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                  pageBuilder: (context, animation1,
+                                          animation2) =>
+                                      SetRepetitions(
+                                          selected_cards: includedExercises),
+                                  transitionDuration: Duration(seconds: 0),
+                                  reverseTransitionDuration: Duration.zero),
+                            )
+                        : null,
                     backgroundColor: Colors.black,
                     child: Center(
                         child: Image.asset(
