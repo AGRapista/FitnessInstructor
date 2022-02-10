@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import '../components/workout_components/exerciseItem.dart';
 import '../components/workout_components/exerciseList.dart';
 
@@ -15,13 +19,29 @@ class _OrderWorkoutState extends State<OrderWorkout> {
   List<Exercise> selected_cards;
   late int selected_cardsNo;
 
+  late File jsonFile;
+  late Directory dir;
+  String fileName = "Workouts.json";
+  bool fileExists = false;
+
   @override
   void initState() {
     super.initState();
     selected_cardsNo = selected_cards.length;
+    getApplicationDocumentsDirectory().then((Directory directory) {
+      dir = directory;
+      jsonFile = new File(dir.path + "/" + fileName);
+      fileExists = jsonFile.existsSync();
+      fileExists
+          ? print("File exists!")
+          // setState(
+          //     () => fileContent = jsonDecode(jsonFile.readAsStringSync()))
+          : createFile();
+    });
   }
 
   _OrderWorkoutState(this.selected_cards);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,14 +117,50 @@ class _OrderWorkoutState extends State<OrderWorkout> {
             style: TextStyle(fontFamily: 'Roboto', fontSize: 16)),
       );
   void SaveWorkouts() {
-    ;
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-          pageBuilder: (context, animation1, animation2) =>
-              OrderWorkout(selected_cards: selected_cards),
-          transitionDuration: Duration(seconds: 0),
-          reverseTransitionDuration: Duration.zero),
-    );
+    writeToFile(selected_cards);
+    int count = 0;
+    Navigator.popUntil(context, (route) {
+      return count++ == 3;
+    });
+
+    // Navigator.push(
+    //   context,
+    //   PageRouteBuilder(
+    //       pageBuilder: (context, animation1, animation2) =>
+    //           OrderWorkout(selected_cards: selected_cards),
+    //       transitionDuration: Duration(seconds: 0),
+    //       reverseTransitionDuration: Duration.zero),
+    // );
+  }
+
+  void createFile() {
+    print("\n \n Creating file");
+    File file = new File(dir.path + "/" + fileName);
+    jsonFile.createSync();
+    fileExists = true;
+    jsonFile.writeAsStringSync("[]");
+  }
+
+  void writeToFile(List<Exercise> exerciseSelection) {
+    List<dynamic> content = json.decode(jsonFile.readAsStringSync());
+    Map<String, dynamic> exercises = {};
+    for (Exercise exercise in exerciseSelection) {
+      exercises.addAll({
+        exercise.exercise_name: {
+          "exercise_image": exercise.exercise_image,
+          "exercise_name": exercise.exercise_name,
+          "exercise_displayName": exercise.exercise_displayName,
+          "reps": exercise.reps,
+          "sets": exercise.sets
+        }
+      });
+    }
+    content.add({
+      'workout_no': "Workout " + content.length.toString(),
+      'workout_list': exercises
+    });
+    jsonFile.writeAsStringSync(jsonEncode(content));
+    print("\n-------------- CONTENT ----------------\n" + content.toString());
+    // jsonFile.delete();
   }
 }
