@@ -34,7 +34,6 @@ dependencies:
   tflite_flutter: ^0.9.0
   tflite_flutter_helper: ^0.3.1
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
@@ -73,6 +72,8 @@ flutter:
   - assets/img/card_dumbellcurl.png
   - assets/img/card_shoulderpress.png
   - assets/img/card_lateralraise.png 
+  - assets/img/checkmark.png
+  - assets/img/crossmark.png
   
 
   # To add assets to your application, add an assets section, like this:
