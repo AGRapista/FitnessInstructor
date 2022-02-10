@@ -118,7 +118,10 @@ class _OrderWorkoutState extends State<OrderWorkout> {
       );
   void SaveWorkouts() {
     writeToFile(selected_cards);
-    Navigator.of(context).popUntil((ManageWorkout) => ManageWorkout.isFirst);
+    int count = 0;
+    Navigator.popUntil(context, (route) {
+      return count++ == 3;
+    });
 
     // Navigator.push(
     //   context,
@@ -135,11 +138,11 @@ class _OrderWorkoutState extends State<OrderWorkout> {
     File file = new File(dir.path + "/" + fileName);
     jsonFile.createSync();
     fileExists = true;
-    jsonFile.writeAsStringSync("{}");
+    jsonFile.writeAsStringSync("[]");
   }
 
   void writeToFile(List<Exercise> exerciseSelection) {
-    Map<String, dynamic> content = json.decode(jsonFile.readAsStringSync());
+    List<dynamic> content = json.decode(jsonFile.readAsStringSync());
     Map<String, dynamic> exercises = {};
     for (Exercise exercise in exerciseSelection) {
       exercises.addAll({
@@ -151,9 +154,12 @@ class _OrderWorkoutState extends State<OrderWorkout> {
           "sets": exercise.sets
         }
       });
-      content.addAll({"Workout" + content.length.toString(): exercises});
-      jsonFile.writeAsStringSync(jsonEncode(content));
     }
+    content.add({
+      'workout_no': "Workout " + content.length.toString(),
+      'workout_list': exercises
+    });
+    jsonFile.writeAsStringSync(jsonEncode(content));
     print("\n-------------- CONTENT ----------------\n" + content.toString());
     // jsonFile.delete();
   }
