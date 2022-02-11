@@ -24,7 +24,6 @@ class _SetupWorkoutState extends State<SetupWorkout> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fetchWorkouts();
   }
@@ -38,14 +37,44 @@ class _SetupWorkoutState extends State<SetupWorkout> {
         children: [
           fileExists
               ? Container(
-                  child: ListView.builder(
-                    itemCount: workouts.length,
-                    itemBuilder: (context, index) {
-                      final exercise = workouts[index];
-                      printWrapped("On build item: " + exercise.toString());
-                      return buildItem(index, exercise);
-                    },
-                  ),
+                  child: Column(children: [
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Center(
+                      child: Text("Your workouts",
+                          style: TextStyle(fontFamily: 'Roboto', fontSize: 25)),
+                    ),
+                    ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: workouts.length,
+                      itemBuilder: (context, index) {
+                        final exercise = workouts[index];
+                        printWrapped("On build item: " + exercise.toString());
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                                bottomRight: Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 5,
+                                blurRadius: 7,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          child: buildItem(index, exercise),
+                        );
+                      },
+                    ),
+                  ]),
                 )
               : Positioned(
                   top: 50, left: 50, child: Text("No workouts available")),
@@ -78,7 +107,13 @@ class _SetupWorkoutState extends State<SetupWorkout> {
   Widget buildItem(int index, Map<String, dynamic> workout) => ListTile(
         key: ValueKey(workout),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        leading: Text(workout["workout_no"]),
+        title: Text(workout["workout_no"],
+            style: TextStyle(fontFamily: 'Roboto', fontSize: 20)),
+        subtitle: Row(children: [
+          for (Map<String, dynamic> exercise in workout["workout_list"])
+            Text(exercise["exercise_displayName"] + " ")
+        ]),
+        trailing: IconButton(onPressed: null, icon: Icon(Icons.delete)),
       );
 
   Future<void> fetchWorkouts() async {
