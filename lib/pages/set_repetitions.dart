@@ -56,88 +56,114 @@ class _SetRepetitionsState extends State<SetRepetitions> {
         backgroundColor: Colors.black,
       ),
       body: Container(
-        child: Stack(
-          children: [
-            Container(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+        child: ClipRect(
+          child: ListView(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
               children: [
-                for (Exercise exercise in selected_cards)
-                  Container(
-                      child: Row(
-                    children: [
-                      Center(
-                          child: Image.asset(exercise.exercise_image,
-                              height: 200, width: 150)),
-                      SliderTheme(
-                        data: SliderThemeData(trackHeight: 5),
-                        child: Column(
-                          children: [
-                            Row(
+                SizedBox(
+                  height: 20,
+                ),
+                Text(" Set exercise sets and repetitions",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontFamily: 'Roboto', fontSize: 25)),
+                Stack(
+                  children: [
+                    Container(
+                      child: ClipRect(
+                          child: Column(
+                        children: [
+                          for (Exercise exercise in selected_cards)
+                            Container(
+                                child: Row(
                               children: [
-                                Column(children: [
-                                  Text('Reps'),
-                                  Text(exercise.reps.toInt().toString(),
-                                      style: TextStyle(
-                                          fontFamily: 'Roboto', fontSize: 30)),
-                                ]),
-                                SizedBox(
-                                  width: 140,
-                                  child: Slider(
-                                      value: exercise.reps.toDouble(),
-                                      min: 1,
-                                      max: 30,
-                                      onChanged: (value) =>
-                                          onSliderChange(0, value, exercise)),
+                                Center(
+                                    child: Image.asset(exercise.exercise_image,
+                                        height: 200, width: 150)),
+                                SliderTheme(
+                                  data: SliderThemeData(trackHeight: 5),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Column(children: [
+                                            Text('Reps'),
+                                            Text(
+                                                exercise.reps
+                                                    .toInt()
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 30)),
+                                          ]),
+                                          SizedBox(
+                                            width: 140,
+                                            child: Slider(
+                                                value: exercise.reps.toDouble(),
+                                                min: 1,
+                                                max: 30,
+                                                onChanged: (value) =>
+                                                    onSliderChange(
+                                                        0, value, exercise)),
+                                          )
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Column(children: [
+                                            Text('Sets'),
+                                            Text(
+                                                exercise.sets
+                                                    .toInt()
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 30)),
+                                          ]),
+                                          SizedBox(
+                                            width: 140,
+                                            child: Slider(
+                                                value: exercise.sets.toDouble(),
+                                                min: 1,
+                                                max: 30,
+                                                onChanged: (value) =>
+                                                    onSliderChange(
+                                                        1, value, exercise)),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
                                 )
                               ],
-                            ),
-                            Row(
-                              children: [
-                                Column(children: [
-                                  Text('Sets'),
-                                  Text(exercise.sets.toInt().toString(),
-                                      style: TextStyle(
-                                          fontFamily: 'Roboto', fontSize: 30)),
-                                ]),
-                                SizedBox(
-                                  width: 140,
-                                  child: Slider(
-                                      value: exercise.sets.toDouble(),
-                                      min: 1,
-                                      max: 30,
-                                      onChanged: (value) =>
-                                          onSliderChange(1, value, exercise)),
-                                )
-                              ],
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ))
-              ],
-            )),
-            Positioned(
-                bottom: 20,
-                right: 10,
-                child: FloatingActionButton(
-                    onPressed: () => Navigator.push(
-                          context,
-                          PageRouteBuilder(
-                              pageBuilder: (context, animation1, animation2) =>
-                                  OrderWorkout(selected_cards: selected_cards),
-                              transitionDuration: Duration(seconds: 0),
-                              reverseTransitionDuration: Duration.zero),
-                        ),
-                    backgroundColor: Colors.black,
-                    child: Center(
-                        child: Image.asset(
-                      'assets/img/add_icon.png',
-                      height: 20,
-                      width: 20,
-                    ))))
-          ],
+                            ))
+                        ],
+                      )),
+                    ),
+                    Positioned(
+                        bottom: 20,
+                        right: 10,
+                        child: FloatingActionButton(
+                            onPressed: () => Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                      pageBuilder: (context, animation1,
+                                              animation2) =>
+                                          OrderWorkout(
+                                              selected_cards: selected_cards),
+                                      transitionDuration: Duration(seconds: 0),
+                                      reverseTransitionDuration: Duration.zero),
+                                ),
+                            backgroundColor: Colors.black,
+                            child: Center(
+                                child: Image.asset(
+                              'assets/img/add_icon.png',
+                              height: 20,
+                              width: 20,
+                            ))))
+                  ],
+                ),
+              ]),
         ),
       ),
     );
