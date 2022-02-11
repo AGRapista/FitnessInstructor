@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/pages/setup_routine.dart';
 import 'setup_workouts.dart';
 
 class ManageWorkout extends StatefulWidget {
@@ -44,7 +45,7 @@ class _ManageWorkoutState extends State<ManageWorkout> {
               ];
             },
             body: TabBarView(
-              children: [SetupWorkout(), SetupWorkout()],
+              children: [SetupWorkout(), SetupRoutine()],
             )),
       ),
     );
