@@ -109,12 +109,25 @@ class _SetupWorkoutState extends State<SetupWorkout> {
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         title: Text(workout["workout_no"],
             style: TextStyle(fontFamily: 'Roboto', fontSize: 20)),
-        subtitle: Row(children: [
-          for (Map<String, dynamic> exercise in workout["workout_list"])
-            Text(exercise["exercise_displayName"] + " ")
-        ]),
-        trailing: IconButton(onPressed: null, icon: Icon(Icons.delete)),
+        subtitle: buildText(workout["workout_list"]),
+        trailing: IconButton(
+            onPressed: () => deleteWorkout(workout["workout_no"]),
+            icon: Icon(Icons.delete)),
       );
+
+  Widget buildText(List<dynamic> workouts) {
+    String exerciseList = "";
+    for (Map<String, dynamic> exercise in workouts) {
+      exerciseList += exercise["exercise_displayName"] + ", ";
+      if (exerciseList.length > 40) {
+        exerciseList.substring(0, 30);
+        exerciseList += "...";
+        break;
+      }
+    }
+    print("EXER: " + exerciseList);
+    return Text(exerciseList);
+  }
 
   Future<void> fetchWorkouts() async {
     getApplicationDocumentsDirectory().then((Directory directory) {
@@ -129,6 +142,24 @@ class _SetupWorkoutState extends State<SetupWorkout> {
             fileExists.toString() + " asdasd " + fetchedWorkouts.toString());
         workouts = fetchedWorkouts;
       });
+    });
+  }
+
+  void deleteWorkout(String toDelete) {
+    List<dynamic> newWorkouts = [];
+    int index = 0;
+    for (Map<String, dynamic> workout in workouts) {
+      if (workout["workout_no"] != toDelete) {
+        index += 1;
+        newWorkouts.add({
+          "workout_no": "Workout " + index.toString(),
+          "workout_list": workout["workout_list"]
+        });
+      }
+    }
+    jsonFile.writeAsStringSync(jsonEncode(newWorkouts));
+    setState(() {
+      workouts = newWorkouts;
     });
   }
 
