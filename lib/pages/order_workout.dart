@@ -78,7 +78,9 @@ class _OrderWorkoutState extends State<OrderWorkout> {
                   onReorder: (int oldIndex, int newIndex) {
                     final index = newIndex > oldIndex ? newIndex - 1 : newIndex;
                     final exercise = selected_cards.removeAt(oldIndex);
-                    selected_cards.insert(index, exercise);
+                    setState(() {
+                      selected_cards.insert(index, exercise);
+                    });
                   },
                 ),
               ),
@@ -143,20 +145,18 @@ class _OrderWorkoutState extends State<OrderWorkout> {
 
   void writeToFile(List<Exercise> exerciseSelection) {
     List<dynamic> content = json.decode(jsonFile.readAsStringSync());
-    Map<String, dynamic> exercises = {};
+    List<dynamic> exercises = [];
     for (Exercise exercise in exerciseSelection) {
-      exercises.addAll({
-        exercise.exercise_name: {
-          "exercise_image": exercise.exercise_image,
-          "exercise_name": exercise.exercise_name,
-          "exercise_displayName": exercise.exercise_displayName,
-          "reps": exercise.reps,
-          "sets": exercise.sets
-        }
+      exercises.add({
+        "exercise_name": exercise.exercise_name,
+        "exercise_image": exercise.exercise_image,
+        "exercise_displayName": exercise.exercise_displayName,
+        "reps": exercise.reps,
+        "sets": exercise.sets
       });
     }
     content.add({
-      'workout_no': "Workout " + content.length.toString(),
+      'workout_no': "Workout " + (content.length + 1).toString(),
       'workout_list': exercises
     });
     jsonFile.writeAsStringSync(jsonEncode(content));
