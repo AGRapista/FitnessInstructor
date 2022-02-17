@@ -35,7 +35,7 @@ class _SetupWorkoutState extends State<SetupWorkout> {
     return Container(
       child: Stack(
         children: [
-          fileExists
+          workouts.length != 0
               ? Container(
                   child: Column(children: [
                     SizedBox(
@@ -76,8 +76,12 @@ class _SetupWorkoutState extends State<SetupWorkout> {
                     ),
                   ]),
                 )
-              : Positioned(
-                  top: 50, left: 50, child: Text("No workouts available")),
+              : Center(
+                  child: Text(
+                    "No workouts available",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
           Positioned(
               bottom: 20,
               right: 10,
@@ -121,11 +125,11 @@ class _SetupWorkoutState extends State<SetupWorkout> {
       exerciseList += exercise["exercise_displayName"] + ", ";
       if (exerciseList.length > 40) {
         exerciseList.substring(0, 30);
-        exerciseList += "...";
+        exerciseList += "...  ";
         break;
       }
     }
-    print("EXER: " + exerciseList);
+    exerciseList = exerciseList.substring(0, exerciseList.length - 2);
     return Text(exerciseList);
   }
 
