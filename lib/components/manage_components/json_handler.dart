@@ -126,6 +126,28 @@ class JsonHandler {
     }
     workoutJsonFile.writeAsStringSync(jsonEncode(newWorkouts));
     workouts = newWorkouts;
+
+    int indexOfDeleted = int.parse(toDelete.substring(toDelete.length - 1));
+
+    for (var day in weekSchedule.keys) {
+      // print(day + " | " + weekSchedule[day]);
+      weekSchedule[day] == toDelete ? writeToWeekFile("", day) : null;
+    }
+
+    for (var day in weekSchedule.keys) {
+      // print(day + " | " + weekSchedule[day]);
+      weekSchedule[day] != ""
+          ? int.parse(weekSchedule[day].substring(toDelete.length - 1)) >
+                  indexOfDeleted
+              ? writeToWeekFile(
+                  weekSchedule[day].substring(0, 8) + indexOfDeleted.toString(),
+                  day)
+              : null
+          : null;
+    }
+    // weekJsonFile.delete();
+
+    // printWrapped(json.decode(weekJsonFile.readAsStringSync()));
   }
 
   void printWrapped(String text) {
