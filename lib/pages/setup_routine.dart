@@ -1,8 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
+// import 'dart:convert';
+// import 'dart:io';
+// import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+
+import '../components/manage_components/json_handler.dart';
 
 class SetupRoutine extends StatefulWidget {
   SetupRoutine({Key? key}) : super(key: key);
@@ -12,39 +14,59 @@ class SetupRoutine extends StatefulWidget {
 }
 
 class _SetupRoutineState extends State<SetupRoutine> {
-  late File workoutJsonFile;
-  late File weekJsonFile;
+  late JsonHandler jsonHandler;
 
-  late Directory dir;
+  // UNCOMMENT
 
-  String workoutsFileName = "Workouts.json";
-  String weekFileName = "WeekSchedule.json";
-  bool workoutfileExists = false;
-  bool weekFileExists = false;
+  // late File workoutJsonFile;
+  // late File weekJsonFile;
 
-  List<dynamic> workouts = [];
-  Map<String, dynamic> weekSchedule = {};
+  // late Directory dir;
+
+  // String workoutsFileName = "Workouts.json";
+  // String weekFileName = "WeekSchedule.json";
+  // bool workoutfileExists = false;
+  // bool weekFileExists = false;
+
+  // List<dynamic> workouts = [];
+  // Map<String, dynamic> weekSchedule = {};
 
   String selectedWorkout = "Workout 1";
 
   @override
   void initState() {
     super.initState();
-    getApplicationDocumentsDirectory().then((Directory directory) {
-      dir = directory;
-      weekJsonFile = File(dir.path + "/" + weekFileName);
-      weekFileExists = weekJsonFile.existsSync();
-      fetchWorkouts();
-      print("WEEK EXISTS: " + weekFileExists.toString());
-      weekFileExists ? fetchWeekSchedule() : createWeekFile();
-      print("WEEK SCHED: " + weekSchedule.toString());
+
+    // UNCOMMENT
+
+    // getApplicationDocumentsDirectory().then((Directory directory) {
+    //   dir = directory;
+    //   weekJsonFile = File(dir.path + "/" + weekFileName);
+    //   weekFileExists = weekJsonFile.existsSync();
+    //   fetchWorkouts();
+    //   print("WEEK EXISTS: " + weekFileExists.toString());
+    //   weekFileExists ? fetchWeekSchedule() : createWeekFile();
+    //   print("WEEK SCHED: " + weekSchedule.toString());
+    // });
+
+    initAsync();
+  }
+
+  initAsync() async {
+    jsonHandler = JsonHandler();
+    await jsonHandler.init();
+    jsonHandler.fetchWorkouts();
+    setState(() {
+      jsonHandler.weekFileExists
+          ? jsonHandler.fetchWeekSchedule()
+          : jsonHandler.createWeekFile();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: workouts.length > 0
+      body: jsonHandler.workouts.length > 0
           ? Container(
               child: Column(
               children: [
@@ -72,7 +94,7 @@ class _SetupRoutineState extends State<SetupRoutine> {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<dynamic>(
                         value: selectedWorkout,
-                        items: workouts.map(buildMenuItem).toList(),
+                        items: jsonHandler.workouts.map(buildMenuItem).toList(),
                         onChanged: (workout) => setState(() {
                               selectedWorkout = workout;
                             })),
@@ -119,14 +141,14 @@ class _SetupRoutineState extends State<SetupRoutine> {
               children: [
                 Center(child: Text(day)),
                 InkWell(
-                  onTap: weekSchedule[day] == selectedWorkout
-                      ? () => writeToWeekFile("", day)
-                      : () => writeToWeekFile(selectedWorkout, day),
+                  onTap: jsonHandler.weekSchedule[day] == selectedWorkout
+                      ? () => jsonHandler.writeToWeekFile("", day)
+                      : () => jsonHandler.writeToWeekFile(selectedWorkout, day),
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                    color: weekSchedule[day] == selectedWorkout
+                    color: jsonHandler.weekSchedule[day] == selectedWorkout
                         ? Colors.green
-                        : weekSchedule[day] == ""
+                        : jsonHandler.weekSchedule[day] == ""
                             ? Colors.grey
                             : Colors.red,
                     height: 40,
@@ -138,50 +160,51 @@ class _SetupRoutineState extends State<SetupRoutine> {
         ],
       );
 
-  Future<void> fetchWorkouts() async {
-    setState(() {
-      workoutJsonFile = File(dir.path + "/" + workoutsFileName);
-      workoutfileExists = workoutJsonFile.existsSync();
-      workoutfileExists
-          ? workouts = json.decode(workoutJsonFile.readAsStringSync())
-          : null;
-    });
-    print(workoutfileExists);
-  }
+  // UNCOMMENT
 
-  Future<void> fetchWeekSchedule() async {
-    setState(() {
-      weekJsonFile = File(dir.path + "/" + weekFileName);
-      weekSchedule = json.decode(weekJsonFile.readAsStringSync());
-    });
-    // weekJsonFile.delete();
-    // print("EXISTS? " + weekJsonFile.existsSync().toString());
-  }
+  // Future<void> fetchWorkouts() async {
+  //   setState(() {
+  //     workoutJsonFile = File(dir.path + "/" + workoutsFileName);
+  //     workoutfileExists = workoutJsonFile.existsSync();
+  //     workoutfileExists
+  //         ? workouts = json.decode(workoutJsonFile.readAsStringSync())
+  //         : null;
+  //   });
+  // }
 
-  void createWeekFile() {
-    print("\n \n Creating file");
+  // Future<void> fetchWeekSchedule() async {
+  //   setState(() {
+  //     weekJsonFile = File(dir.path + "/" + weekFileName);
+  //     weekSchedule = json.decode(weekJsonFile.readAsStringSync());
+  //   });
+  //   // weekJsonFile.delete();
+  //   // print("EXISTS? " + weekJsonFile.existsSync().toString());
+  // }
 
-    Map<String, String> emptyWeek = {
-      "Sun": "",
-      "Mon": "",
-      "Tues": "",
-      "Wed": "",
-      "Thurs": "",
-      "Fri": "",
-      "Sat": ""
-    };
+  // void createWeekFile() {
+  //   print("\n \n Creating file");
 
-    weekJsonFile.createSync();
-    weekFileExists = true;
-    weekJsonFile.writeAsStringSync(json.encode(emptyWeek));
+  //   Map<String, String> emptyWeek = {
+  //     "Sun": "",
+  //     "Mon": "",
+  //     "Tues": "",
+  //     "Wed": "",
+  //     "Thurs": "",
+  //     "Fri": "",
+  //     "Sat": ""
+  //   };
 
-    fetchWeekSchedule();
-  }
+  //   weekJsonFile.createSync();
+  //   weekFileExists = true;
+  //   weekJsonFile.writeAsStringSync(json.encode(emptyWeek));
 
-  void writeToWeekFile(String workout_no, String day) {
-    setState(() {
-      weekSchedule[day] = workout_no;
-    });
-    weekJsonFile.writeAsStringSync(json.encode(weekSchedule));
-  }
+  //   fetchWeekSchedule();
+  // }
+
+  // void writeToWeekFile(String workout_no, String day) {
+  //   setState(() {
+  //     weekSchedule[day] = workout_no;
+  //   });
+  //   weekJsonFile.writeAsStringSync(json.encode(weekSchedule));
+  // }
 }
