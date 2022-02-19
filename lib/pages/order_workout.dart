@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../components/workout_components/exerciseItem.dart';
-import '../components/workout_components/exerciseList.dart';
+import '../components/manage_components/json_handler.dart';
 
 class OrderWorkout extends StatefulWidget {
   List<Exercise> selected_cards;
@@ -19,25 +19,38 @@ class _OrderWorkoutState extends State<OrderWorkout> {
   List<Exercise> selected_cards;
   late int selected_cardsNo;
 
-  late File jsonFile;
-  late Directory dir;
-  String fileName = "Workouts.json";
-  bool fileExists = false;
+  late JsonHandler jsonHandler;
+
+  // UNCOMMENT
+
+  // late File jsonFile;
+  // late Directory dir;
+  // String fileName = "Workouts.json";
+  // bool fileExists = false;
 
   @override
   void initState() {
     super.initState();
+    initAsync();
     selected_cardsNo = selected_cards.length;
-    getApplicationDocumentsDirectory().then((Directory directory) {
-      dir = directory;
-      jsonFile = new File(dir.path + "/" + fileName);
-      fileExists = jsonFile.existsSync();
-      fileExists
-          ? print("File exists!")
-          // setState(
-          //     () => fileContent = jsonDecode(jsonFile.readAsStringSync()))
-          : createFile();
-    });
+
+    // UNCOMMENT
+
+    // getApplicationDocumentsDirectory().then((Directory directory) {
+    //   dir = directory;
+    //   jsonFile = new File(dir.path + "/" + fileName);
+    //   fileExists = jsonFile.existsSync();
+    //   fileExists ? print("File exists!") : createFile();
+    // });
+  }
+
+  initAsync() async {
+    jsonHandler = JsonHandler();
+    await jsonHandler.init();
+
+    jsonHandler.workoutfileExists
+        ? print("File exists!")
+        : jsonHandler.createWorkoutFile();
   }
 
   _OrderWorkoutState(this.selected_cards);
@@ -118,49 +131,42 @@ class _OrderWorkoutState extends State<OrderWorkout> {
                 exercise.sets.toString(),
             style: TextStyle(fontFamily: 'Roboto', fontSize: 16)),
       );
+
   void SaveWorkouts() {
-    writeToFile(selected_cards);
+    print("\n \n \n" + selected_cards.toString());
+    jsonHandler.writeToWorkoutFile(selected_cards);
     int count = 0;
     Navigator.popUntil(context, (route) {
       return count++ == 3;
     });
-
-    // Navigator.push(
-    //   context,
-    //   PageRouteBuilder(
-    //       pageBuilder: (context, animation1, animation2) =>
-    //           OrderWorkout(selected_cards: selected_cards),
-    //       transitionDuration: Duration(seconds: 0),
-    //       reverseTransitionDuration: Duration.zero),
-    // );
   }
 
-  void createFile() {
-    print("\n \n Creating file");
-    File file = new File(dir.path + "/" + fileName);
-    jsonFile.createSync();
-    fileExists = true;
-    jsonFile.writeAsStringSync("[]");
-  }
+  // void createFile() {
+  //   print("\n \n Creating file");
+  //   File file = new File(dir.path + "/" + fileName);
+  //   jsonFile.createSync();
+  //   fileExists = true;
+  //   jsonFile.writeAsStringSync("[]");
+  // }
 
-  void writeToFile(List<Exercise> exerciseSelection) {
-    List<dynamic> content = json.decode(jsonFile.readAsStringSync());
-    List<dynamic> exercises = [];
-    for (Exercise exercise in exerciseSelection) {
-      exercises.add({
-        "exercise_name": exercise.exercise_name,
-        "exercise_image": exercise.exercise_image,
-        "exercise_displayName": exercise.exercise_displayName,
-        "reps": exercise.reps,
-        "sets": exercise.sets
-      });
-    }
-    content.add({
-      'workout_no': "Workout " + (content.length + 1).toString(),
-      'workout_list': exercises
-    });
-    jsonFile.writeAsStringSync(jsonEncode(content));
-    print("\n-------------- CONTENT ----------------\n" + content.toString());
-    // jsonFile.delete();
-  }
+  // void writeToFile(List<Exercise> exerciseSelection) {
+  //   List<dynamic> content = json.decode(jsonFile.readAsStringSync());
+  //   List<dynamic> exercises = [];
+  //   for (Exercise exercise in exerciseSelection) {
+  //     exercises.add({
+  //       "exercise_name": exercise.exercise_name,
+  //       "exercise_image": exercise.exercise_image,
+  //       "exercise_displayName": exercise.exercise_displayName,
+  //       "reps": exercise.reps,
+  //       "sets": exercise.sets
+  //     });
+  //   }
+  //   content.add({
+  //     'workout_no': "Workout " + (content.length + 1).toString(),
+  //     'workout_list': exercises
+  //   });
+  //   jsonFile.writeAsStringSync(jsonEncode(content));
+  //   print("\n-------------- CONTENT ----------------\n" + content.toString());
+  // jsonFile.delete();
+  // }
 }
