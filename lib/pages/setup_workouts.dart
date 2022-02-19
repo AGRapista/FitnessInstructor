@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'add_workout.dart';
-import '../components/workout_components/workoutList.dart';
+import '../components/manage_components/json_handler.dart';
 
 class SetupWorkout extends StatefulWidget {
   SetupWorkout({Key? key}) : super(key: key);
@@ -14,28 +14,47 @@ class SetupWorkout extends StatefulWidget {
 }
 
 class _SetupWorkoutState extends State<SetupWorkout> {
-  late File jsonFile;
-  late Directory dir;
-  String fileName = "Workouts.json";
-  bool fileExists = false;
+  late JsonHandler jsonHandler;
 
-  List<dynamic> fetchedWorkouts = [];
-  List<dynamic> workouts = [];
+  // UNCOMMENT
+
+  // late File jsonFile;
+  // late Directory dir;
+  // String fileName = "Workouts.json";
+  // bool fileExists = false;
+
+  // List<dynamic> fetchedWorkouts = [];
+  // List<dynamic> workouts = [];
 
   @override
   void initState() {
     super.initState();
-    fetchWorkouts();
+    initAsync();
+    // UNCOMMENT
+
+    // getApplicationDocumentsDirectory().then((Directory directory) {
+    //   dir = directory;
+    //   fetchWorkouts();
+    // });
+  }
+
+  initAsync() async {
+    jsonHandler = JsonHandler();
+    await jsonHandler.init();
+
+    setState(() {
+      jsonHandler.fetchWorkouts();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    printWrapped("\n \n \nOn widget build: " + workouts.toString());
+    printWrapped("\n \n \nOn widget build: " + jsonHandler.workouts.toString());
 
     return Container(
       child: Stack(
         children: [
-          workouts.length != 0
+          jsonHandler.workouts.length != 0
               ? Container(
                   child: Column(children: [
                     SizedBox(
@@ -48,9 +67,9 @@ class _SetupWorkoutState extends State<SetupWorkout> {
                     ListView.builder(
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
-                      itemCount: workouts.length,
+                      itemCount: jsonHandler.workouts.length,
                       itemBuilder: (context, index) {
-                        final exercise = workouts[index];
+                        final exercise = jsonHandler.workouts[index];
                         printWrapped("On build item: " + exercise.toString());
                         return Container(
                           decoration: BoxDecoration(
@@ -94,7 +113,9 @@ class _SetupWorkoutState extends State<SetupWorkout> {
                             transitionDuration: Duration(seconds: 0),
                             reverseTransitionDuration: Duration.zero),
                       ).then((value) {
-                        fetchWorkouts();
+                        setState(() {
+                          jsonHandler.fetchWorkouts();
+                        });
                       }),
                   backgroundColor: Colors.black,
                   child: Center(
@@ -115,7 +136,9 @@ class _SetupWorkoutState extends State<SetupWorkout> {
             style: TextStyle(fontFamily: 'Roboto', fontSize: 20)),
         subtitle: buildText(workout["workout_list"]),
         trailing: IconButton(
-            onPressed: () => deleteWorkout(workout["workout_no"]),
+            onPressed: () => setState(() {
+                  jsonHandler.deleteWorkout(workout["workout_no"]);
+                }),
             icon: Icon(Icons.delete)),
       );
 
@@ -133,39 +156,36 @@ class _SetupWorkoutState extends State<SetupWorkout> {
     return Text(exerciseList);
   }
 
-  Future<void> fetchWorkouts() async {
-    getApplicationDocumentsDirectory().then((Directory directory) {
-      dir = directory;
-      setState(() {
-        jsonFile = new File(dir.path + "/" + fileName);
-        fileExists = jsonFile.existsSync();
-        fileExists
-            ? fetchedWorkouts = json.decode(jsonFile.readAsStringSync())
-            : null;
-        printWrapped(
-            fileExists.toString() + " asdasd " + fetchedWorkouts.toString());
-        workouts = fetchedWorkouts;
-      });
-    });
-  }
+  // UNCOMMENT
 
-  void deleteWorkout(String toDelete) {
-    List<dynamic> newWorkouts = [];
-    int index = 0;
-    for (Map<String, dynamic> workout in workouts) {
-      if (workout["workout_no"] != toDelete) {
-        index += 1;
-        newWorkouts.add({
-          "workout_no": "Workout " + index.toString(),
-          "workout_list": workout["workout_list"]
-        });
-      }
-    }
-    jsonFile.writeAsStringSync(jsonEncode(newWorkouts));
-    setState(() {
-      workouts = newWorkouts;
-    });
-  }
+  // Future<void> fetchWorkouts() async {
+  //   setState(() {
+  //     jsonFile = new File(dir.path + "/" + fileName);
+  //     fileExists = jsonFile.existsSync();
+  //     fileExists
+  //         ? fetchedWorkouts = json.decode(jsonFile.readAsStringSync())
+  //         : null;
+  //     workouts = fetchedWorkouts;
+  //   });
+  // }
+
+  // void deleteWorkout(String toDelete) {
+  //   List<dynamic> newWorkouts = [];
+  //   int index = 0;
+  //   for (Map<String, dynamic> workout in workouts) {
+  //     if (workout["workout_no"] != toDelete) {
+  //       index += 1;
+  //       newWorkouts.add({
+  //         "workout_no": "Workout " + index.toString(),
+  //         "workout_list": workout["workout_list"]
+  //       });
+  //     }
+  //   }
+  //   jsonFile.writeAsStringSync(jsonEncode(newWorkouts));
+  //   setState(() {
+  //     workouts = newWorkouts;
+  //   });
+  // }
 
   void printWrapped(String text) {
     final pattern = new RegExp('.{1,800}'); // 800 is the size of each chunk
