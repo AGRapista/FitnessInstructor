@@ -142,8 +142,12 @@ class _SetupRoutineState extends State<SetupRoutine> {
                 Center(child: Text(day)),
                 InkWell(
                   onTap: jsonHandler.weekSchedule[day] == selectedWorkout
-                      ? () => jsonHandler.writeToWeekFile("", day)
-                      : () => jsonHandler.writeToWeekFile(selectedWorkout, day),
+                      ? () => setState(() {
+                            jsonHandler.writeToWeekFile("", day);
+                          })
+                      : () => setState(() {
+                            jsonHandler.writeToWeekFile(selectedWorkout, day);
+                          }),
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 5.0),
                     color: jsonHandler.weekSchedule[day] == selectedWorkout
