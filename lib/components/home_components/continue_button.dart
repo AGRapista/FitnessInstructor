@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../test.dart';
 
 class continue_button extends StatefulWidget {
   continue_button({Key? key}) : super(key: key);
@@ -13,7 +14,13 @@ class _continue_buttonState extends State<continue_button> {
     return Container(
         margin: EdgeInsets.only(top: 20),
         child: InkWell(
-          onTap: null,
+          onTap: () => Navigator.push(
+            context,
+            PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) => Test(),
+                transitionDuration: Duration(seconds: 0),
+                reverseTransitionDuration: Duration.zero),
+          ),
           child: Center(
             child: Container(
               decoration: BoxDecoration(
