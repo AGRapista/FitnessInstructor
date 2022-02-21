@@ -9,6 +9,7 @@ import 'utility/classifier.dart';
 import 'utility/isolate.dart';
 
 import 'components/perform_components/utility.dart';
+import '../components/manage_components/json_handler.dart';
 
 class Test extends StatefulWidget {
   Test({Key? key}) : super(key: key);
@@ -32,6 +33,19 @@ class _TestState extends State<Test> {
   double body_angle = 0;
   double arm_angle = 0;
 
+  // WORKOUT AND WEEK DATA
+  late JsonHandler jsonHandler;
+  late List<dynamic> exercise;
+  late String workout;
+  late var dayToday;
+
+  // DAY WORKOUT VARIABLES
+  int workoutIndex = 0;
+  String exerciseName = "";
+  String imgUrl = "";
+  int reps = 0;
+  int sets = 0;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +58,77 @@ class _TestState extends State<Test> {
     classifier = Classifier();
     classifier.loadModel();
     loadCamera();
+
+    jsonHandler = JsonHandler();
+    await jsonHandler.init();
+
+    jsonHandler.workoutfileExists ? jsonHandler.fetchWorkouts() : null;
+    jsonHandler.weekFileExists ? fetchDayWorkout() : null;
+  }
+
+  void fetchDayWorkout() {
+    dayToday = DateTime.now();
+    switch (dayToday.weekday) {
+      case 1:
+        dayToday = "Mon";
+        break;
+      case 2:
+        dayToday = "Tues";
+        break;
+      case 3:
+        dayToday = "Wed";
+        break;
+      case 4:
+        dayToday = "Thurs";
+        break;
+      case 5:
+        dayToday = "Fri";
+        break;
+      case 6:
+        dayToday = "Sat";
+        break;
+      case 7:
+        dayToday = "Sun";
+        break;
+    }
+    jsonHandler.fetchWeekSchedule();
+
+    print(dayToday);
+    for (var day in jsonHandler.weekSchedule.keys) {
+      print(dayToday.toString() +
+          " " +
+          day +
+          " " +
+          jsonHandler.weekSchedule[day]);
+      if (dayToday == day) {
+        setState(() {
+          workout = jsonHandler.weekSchedule[day];
+        });
+      }
+    }
+
+    int index = int.parse(workout.substring(workout.length - 1)) - 1;
+    exercise = jsonHandler.workouts[index]["workout_list"];
+
+    // print("\n \n \nWORKOUT TODAY:" + workout);
+    // print(exercise);
+    getExerciseData();
+  }
+
+  void getExerciseData() {
+    setState(() {
+      imgUrl = exercise[workoutIndex]["exercise_image"];
+      exerciseName = exercise[workoutIndex]["exercise_displayName"];
+      reps = exercise[workoutIndex]["reps"];
+      sets = exercise[workoutIndex]["sets"];
+    });
+  }
+
+  void nextWorkout() {
+    setState(() {
+      workoutIndex += 1;
+    });
+    getExerciseData();
   }
 
   loadCamera() {
@@ -89,7 +174,7 @@ class _TestState extends State<Test> {
       body_angle = getAngle(pointA, pointB, pointC);
     });
 
-    print(inferenceResults.toString());
+    // print(inferenceResults.toString());
   }
 
   Future<List<dynamic>> inference(IsolateData isolateData) async {
@@ -103,18 +188,29 @@ class _TestState extends State<Test> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Test"),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(),
+            Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 15, 0),
+                child: Text('Perform workoutss')),
+            Image.asset('assets/img/shoulder_press_icon.png',
+                width: 35, height: 35)
+          ],
+        ),
+        backgroundColor: Colors.black,
       ),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(5),
             child: initialized
                 ? Container(
                     height: MediaQuery.of(context).size.height * 0.7,
                     width: MediaQuery.of(context).size.width,
                     child: CustomPaint(
-                      foregroundPainter: RenderLandmarks(inferences),
+                      foregroundPainter: RenderLandmarks(inferences, [5, 7, 9]),
                       child: !cameraController!.value.isInitialized
                           ? Container()
                           : AspectRatio(
@@ -129,7 +225,15 @@ class _TestState extends State<Test> {
             //     quarterTurns: 3,
             //     child: Image.memory(imageLib.encodeJpg(holder) as Uint8List))
           ),
-          Text(body_angle.toString(), style: TextStyle(fontSize: 30))
+          Text(body_angle.toString(), style: TextStyle(fontSize: 30)),
+          Row(
+            children: [
+              Text(exerciseName),
+              Text(reps.toString()),
+              Text(sets.toString()),
+              FloatingActionButton(onPressed: nextWorkout),
+            ],
+          )
         ],
       ),
     );
@@ -139,6 +243,7 @@ class _TestState extends State<Test> {
 class RenderLandmarks extends CustomPainter {
   late List<dynamic> inferenceList;
   late PointMode pointMode;
+  late List<int> selectedLandmarks;
   var point_paint = Paint()
     ..color = Colors.red
     ..strokeCap = StrokeCap.round
@@ -168,8 +273,9 @@ class RenderLandmarks extends CustomPainter {
     [12, 14], // right_hip to right_knee
     [14, 16] // right_knee to right_ankle
   ];
-  RenderLandmarks(List<dynamic> inferences) {
+  RenderLandmarks(List<dynamic> inferences, List<int> included) {
     inferenceList = inferences;
+    selectedLandmarks = included;
   }
   @override
   void paint(Canvas canvas, Size size) {
@@ -182,7 +288,7 @@ class RenderLandmarks extends CustomPainter {
     //       Offset(vertex1X, vertex1Y), Offset(vertex2X, vertex2Y), edge_paint);
     // }
 
-    renderEdge(canvas, [5, 7, 9]);
+    renderEdge(canvas, selectedLandmarks);
     canvas.drawPoints(PointMode.points, points, point_paint);
   }
 
