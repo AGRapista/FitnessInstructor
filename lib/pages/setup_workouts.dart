@@ -44,6 +44,9 @@ class _SetupWorkoutState extends State<SetupWorkout> {
 
     setState(() {
       jsonHandler.fetchWorkouts();
+      jsonHandler.weekFileExists
+          ? jsonHandler.fetchWeekSchedule()
+          : jsonHandler.createWeekFile();
     });
   }
 
