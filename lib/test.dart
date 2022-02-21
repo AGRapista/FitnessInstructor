@@ -24,9 +24,9 @@ class _TestState extends State<Test> {
   late Classifier classifier;
   late IsolateUtils isolate;
 
-  late List parsedData;
   bool predicting = false;
   bool initialized = false;
+  late List parsedData;
   late List<dynamic> inferences;
 
   // TEST VARIABLES
@@ -45,6 +45,43 @@ class _TestState extends State<Test> {
   String imgUrl = "";
   int reps = 0;
   int sets = 0;
+
+  // POSE AND FORM VALIDATION
+  bool isProperForm = false;
+  List<dynamic> limbs = [
+    [
+      [5, 7, 9],
+      false
+    ],
+    [
+      [6, 8, 10],
+      false
+    ],
+    [
+      [7, 5, 11],
+      false
+    ],
+    [
+      [8, 6, 12],
+      false
+    ],
+    [
+      [5, 11, 13],
+      false
+    ],
+    [
+      [6, 12, 14],
+      false
+    ],
+    [
+      [11, 13, 15],
+      false
+    ],
+    [
+      [12, 14, 16],
+      false
+    ],
+  ];
 
   @override
   void initState() {
@@ -131,7 +168,7 @@ class _TestState extends State<Test> {
     getExerciseData();
   }
 
-  loadCamera() {
+  void loadCamera() {
     setState(() {
       cameraController = CameraController(cameras![1], ResolutionPreset.medium);
     });
@@ -146,7 +183,7 @@ class _TestState extends State<Test> {
     });
   }
 
-  createIsolate(CameraImage imageStream) async {
+  void createIsolate(CameraImage imageStream) async {
     if (predicting == true) {
       return;
     }
@@ -172,6 +209,22 @@ class _TestState extends State<Test> {
       List<int> pointB = [inferenceResults[7][0], inferenceResults[7][1]];
       List<int> pointC = [inferenceResults[9][0], inferenceResults[9][1]];
       body_angle = getAngle(pointA, pointB, pointC);
+
+      int limbsIndex = 0;
+      for (var limb in limbs) {
+        var A = limb[0][0];
+        var B = limb[0][1];
+        var C = limb[0][2];
+        pointA = [inferenceResults[A][0], inferenceResults[A][1]];
+        pointB = [inferenceResults[B][0], inferenceResults[B][1]];
+        pointC = [inferenceResults[C][0], inferenceResults[C][1]];
+        if (getAngle(pointA, pointB, pointC) > 90) {
+          limbs[limbsIndex][1] = true;
+        } else {
+          limbs[limbsIndex][1] = false;
+        }
+        limbsIndex += 1;
+      }
     });
 
     // print(inferenceResults.toString());
@@ -210,7 +263,7 @@ class _TestState extends State<Test> {
                     height: MediaQuery.of(context).size.height * 0.7,
                     width: MediaQuery.of(context).size.width,
                     child: CustomPaint(
-                      foregroundPainter: RenderLandmarks(inferences, [5, 7, 9]),
+                      foregroundPainter: RenderLandmarks(inferences, limbs),
                       child: !cameraController!.value.isInitialized
                           ? Container()
                           : AspectRatio(
@@ -243,15 +296,33 @@ class _TestState extends State<Test> {
 class RenderLandmarks extends CustomPainter {
   late List<dynamic> inferenceList;
   late PointMode pointMode;
-  late List<int> selectedLandmarks;
-  var point_paint = Paint()
+  late List<dynamic> selectedLandmarks;
+
+  // COLOR PROFILES
+
+  // CORRECT POSTURE COLOR PROFILE
+  var point_green = Paint()
+    ..color = Colors.green
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = 8;
+
+  var edge_green = Paint()
+    ..color = Colors.lightGreen
+    ..strokeWidth = 5;
+
+  // INCORRECT POSTURE COLOR PROFILE
+
+  var point_red = Paint()
     ..color = Colors.red
     ..strokeCap = StrokeCap.round
     ..strokeWidth = 8;
-  var edge_paint = Paint()
+
+  var edge_red = Paint()
     ..color = Colors.orange
     ..strokeWidth = 5;
-  List<Offset> points = [];
+
+  List<Offset> points_green = [];
+  List<Offset> points_red = [];
 
   List<dynamic> edges = [
     [0, 1], // nose to left_eye
@@ -273,7 +344,7 @@ class RenderLandmarks extends CustomPainter {
     [12, 14], // right_hip to right_knee
     [14, 16] // right_knee to right_ankle
   ];
-  RenderLandmarks(List<dynamic> inferences, List<int> included) {
+  RenderLandmarks(List<dynamic> inferences, List<dynamic> included) {
     inferenceList = inferences;
     selectedLandmarks = included;
   }
@@ -288,17 +359,24 @@ class RenderLandmarks extends CustomPainter {
     //       Offset(vertex1X, vertex1Y), Offset(vertex2X, vertex2Y), edge_paint);
     // }
 
-    renderEdge(canvas, selectedLandmarks);
-    canvas.drawPoints(PointMode.points, points, point_paint);
+    for (var limb in selectedLandmarks) {
+      renderEdge(canvas, limb[0], limb[1]);
+    }
+    canvas.drawPoints(PointMode.points, points_green, point_green);
+    canvas.drawPoints(PointMode.points, points_red, point_red);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 
-  void renderEdge(Canvas canvas, List<int> included) {
+  void renderEdge(Canvas canvas, List<int> included, bool isCorrect) {
     for (List<dynamic> point in inferenceList) {
       if ((point[2] > 0.40) & included.contains(inferenceList.indexOf(point))) {
-        points.add(Offset(point[0].toDouble() - 70, point[1].toDouble() - 30));
+        isCorrect
+            ? points_green
+                .add(Offset(point[0].toDouble() - 70, point[1].toDouble() - 30))
+            : points_red.add(
+                Offset(point[0].toDouble() - 70, point[1].toDouble() - 30));
       }
     }
 
@@ -308,8 +386,8 @@ class RenderLandmarks extends CustomPainter {
         double vertex1Y = inferenceList[edge[0]][1].toDouble() - 30;
         double vertex2X = inferenceList[edge[1]][0].toDouble() - 70;
         double vertex2Y = inferenceList[edge[1]][1].toDouble() - 30;
-        canvas.drawLine(
-            Offset(vertex1X, vertex1Y), Offset(vertex2X, vertex2Y), edge_paint);
+        canvas.drawLine(Offset(vertex1X, vertex1Y), Offset(vertex2X, vertex2Y),
+            isCorrect ? edge_green : edge_red);
       }
     }
   }
