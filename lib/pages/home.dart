@@ -10,15 +10,17 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(slivers: <Widget>[
-        SliverAppBar(
+        const SliverAppBar(
           title: MainAppBar(),
           backgroundColor: Colors.white,
           pinned: true,
           expandedHeight: 200,
           shape: ContinuousRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(100),
-                  bottomRight: Radius.circular(100))),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(100),
+              bottomRight: Radius.circular(100),
+            ),
+          ),
         ),
         SliverList(
             delegate: SliverChildListDelegate(

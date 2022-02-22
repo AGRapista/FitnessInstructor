@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project/pages/home.dart';
 import 'package:project/test.dart';
 import 'package:camera/camera.dart';
+import 'package:project/pages/progress.dart';
 
 List<CameraDescription>? cameras;
 void main() async {
@@ -16,8 +17,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(primaryColor: Colors.purple),
-        debugShowCheckedModeBanner: false,
-        home: Home());
+      theme: ThemeData(primaryColor: Colors.purple),
+      debugShowCheckedModeBanner: false,
+      home: Home(),
+    );
   }
 }
