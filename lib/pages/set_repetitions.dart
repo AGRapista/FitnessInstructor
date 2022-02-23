@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project/pages/add_workout.dart';
 
-import '../components/workout_components/exerciseItem.dart';
-import '../components/workout_components/exerciseList.dart';
+import '../components/shared/exerciseItem.dart';
+import '../components/shared/exerciseList.dart';
 
 import 'order_workout.dart';
 

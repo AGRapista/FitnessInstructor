@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'add_workout.dart';
-import '../components/manage_components/json_handler.dart';
+import '../components/shared/json_handler.dart';
 
 class SetupWorkout extends StatefulWidget {
   SetupWorkout({Key? key}) : super(key: key);

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../components/manage_components/json_handler.dart';
+import '../components/shared/json_handler.dart';
 
 class SetupRoutine extends StatefulWidget {
   SetupRoutine({Key? key}) : super(key: key);

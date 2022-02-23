@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:project/components/workout_components/exerciseItem.dart';
+import 'package:project/components/shared/exerciseItem.dart';
 import 'set_repetitions.dart';
-import '../components/workout_components/exerciseItem.dart';
-import '../components/workout_components/exerciseList.dart';
+import '../components/shared/exerciseItem.dart';
+import '../components/shared/exerciseList.dart';
 
 class AddWorkout extends StatefulWidget {
   AddWorkout({Key? key}) : super(key: key);
