@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -8,8 +9,10 @@ import 'main.dart';
 import 'utility/classifier.dart';
 import 'utility/isolate.dart';
 
+import 'components/shared/exerciseList.dart';
 import 'components/perform_components/utility.dart';
-import '../components/manage_components/json_handler.dart';
+import 'components/shared/json_handler.dart';
+import 'components/shared/exercise_handler.dart';
 
 class Test extends StatefulWidget {
   Test({Key? key}) : super(key: key);
@@ -30,8 +33,8 @@ class _TestState extends State<Test> {
   late List<dynamic> inferences;
 
   // TEST VARIABLES
-  double body_angle = 0;
-  double arm_angle = 0;
+  double test_angle1 = 0;
+  double test_angle2 = 0;
 
   // WORKOUT AND WEEK DATA
   late JsonHandler jsonHandler;
@@ -40,48 +43,74 @@ class _TestState extends State<Test> {
   late var dayToday;
 
   // DAY WORKOUT VARIABLES
+  late var handler;
+
   int workoutIndex = 0;
   String exerciseName = "";
+  String exerciseDisplayName = "";
   String imgUrl = "";
   int reps = 0;
   int sets = 0;
 
+  int doneReps = 0;
+  int doneSets = 0;
+  var stage = "up";
+  bool rest = false;
+  int restTime = 0;
+
   // POSE AND FORM VALIDATION
   bool isProperForm = false;
-  List<dynamic> limbs = [
+  List<dynamic> limbs2 = [
+    [
+      [7, 5, 11],
+      false,
+      5,
+      25
+    ],
+    // [
+    //   [8, 6, 12],
+    //   false,
+    //   5,
+    //   25
+    // ],
+    [
+      [5, 11, 13],
+      false,
+      170,
+      180
+    ],
+    // [
+    //   [6, 12, 14],
+    //   false,
+    //   160,
+    //   180
+    // ],
+    // [
+    //   [11, 13, 15],
+    //   false,
+    //   170,
+    //   180
+    // ],
+    // [
+    //   [12, 14, 16],
+    //   false,
+    //   160,
+    //   180
+    // ],
+  ];
+
+  List<dynamic> targets = [
     [
       [5, 7, 9],
       false
     ],
-    [
-      [6, 8, 10],
-      false
-    ],
-    [
-      [7, 5, 11],
-      false
-    ],
-    [
-      [8, 6, 12],
-      false
-    ],
-    [
-      [5, 11, 13],
-      false
-    ],
-    [
-      [6, 12, 14],
-      false
-    ],
-    [
-      [11, 13, 15],
-      false
-    ],
-    [
-      [12, 14, 16],
-      false
-    ],
+    // [
+    //   [6, 8, 10],
+    //   false
+    // ],
   ];
+
+  List<dynamic> limbs = [];
 
   @override
   void initState() {
@@ -101,6 +130,11 @@ class _TestState extends State<Test> {
 
     jsonHandler.workoutfileExists ? jsonHandler.fetchWorkouts() : null;
     jsonHandler.weekFileExists ? fetchDayWorkout() : null;
+
+    setState(() {
+      limbs = handler.limbs;
+      targets = handler.targets;
+    });
   }
 
   void fetchDayWorkout() {
@@ -154,10 +188,14 @@ class _TestState extends State<Test> {
 
   void getExerciseData() {
     setState(() {
+      exerciseName = exercise[workoutIndex]["exercise_name"];
       imgUrl = exercise[workoutIndex]["exercise_image"];
-      exerciseName = exercise[workoutIndex]["exercise_displayName"];
+      exerciseDisplayName = exercise[workoutIndex]["exercise_displayName"];
       reps = exercise[workoutIndex]["reps"];
       sets = exercise[workoutIndex]["sets"];
+      handler = Exercises[exerciseName]!.handler;
+      print(handler);
+      handler.init();
     });
   }
 
@@ -183,6 +221,64 @@ class _TestState extends State<Test> {
     });
   }
 
+  bool isPostureCorrect() {
+    for (var limb in limbs) {
+      if (limb[1] == false) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void checkLimbs(var inferenceResults, var limbsIndex) {
+    print("______________________________________");
+    for (var limb in limbs) {
+      var A = limb[0][0];
+      var B = limb[0][1];
+      var C = limb[0][2];
+      List<int> pointA = [inferenceResults[A][0], inferenceResults[A][1]];
+      List<int> pointB = [inferenceResults[B][0], inferenceResults[B][1]];
+      List<int> pointC = [inferenceResults[C][0], inferenceResults[C][1]];
+      var angle = getAngle(pointA, pointB, pointC);
+      print(limb[0].toString() + " | " + angle.toString());
+      if (angle >= limb[2] && angle <= limb[3]) {
+        limbs[limbsIndex][1] = true;
+      } else {
+        limbs[limbsIndex][1] = false;
+      }
+      limbsIndex += 1;
+    }
+  }
+
+  void doReps(var inferenceResults) {
+    if (isProperForm) {
+      var angle = 0.0;
+      for (var target in targets) {
+        var A = target[0][0];
+        var B = target[0][1];
+        var C = target[0][2];
+        List<int> pointA = [inferenceResults[A][0], inferenceResults[A][1]];
+        List<int> pointB = [inferenceResults[B][0], inferenceResults[B][1]];
+        List<int> pointC = [inferenceResults[C][0], inferenceResults[C][1]];
+        angle = getAngle(pointA, pointB, pointC);
+        setState(() {
+          test_angle1 = angle;
+        });
+      }
+      if (angle < 30) {
+        setState(() {
+          stage = "down";
+        });
+      }
+      if (angle > 160 && stage == "down") {
+        setState(() {
+          stage = "up";
+          doneReps += 1;
+        });
+      }
+    }
+  }
+
   void createIsolate(CameraImage imageStream) async {
     if (predicting == true) {
       return;
@@ -205,25 +301,81 @@ class _TestState extends State<Test> {
       // List<int> pointB = [inferenceResults[11][0], inferenceResults[11][1]];
       // List<int> pointC = [inferenceResults[11][0] + 50, 0];
 
-      List<int> pointA = [inferenceResults[5][0], inferenceResults[5][1]];
-      List<int> pointB = [inferenceResults[7][0], inferenceResults[7][1]];
-      List<int> pointC = [inferenceResults[9][0], inferenceResults[9][1]];
-      body_angle = getAngle(pointA, pointB, pointC);
+      List<int> pointA = [inferenceResults[7][0], inferenceResults[7][1]];
+      List<int> pointB = [inferenceResults[5][0], inferenceResults[5][1]];
+      List<int> pointC = [inferenceResults[11][0], inferenceResults[11][1]];
+      test_angle2 = getAngle(pointA, pointB, pointC);
 
       int limbsIndex = 0;
-      for (var limb in limbs) {
-        var A = limb[0][0];
-        var B = limb[0][1];
-        var C = limb[0][2];
-        pointA = [inferenceResults[A][0], inferenceResults[A][1]];
-        pointB = [inferenceResults[B][0], inferenceResults[B][1]];
-        pointC = [inferenceResults[C][0], inferenceResults[C][1]];
-        if (getAngle(pointA, pointB, pointC) > 90) {
-          limbs[limbsIndex][1] = true;
+
+      //   if (!rest) {
+      //     if (doneSets < sets) {
+      //       if (doneReps < reps) {
+      //         checkLimbs(inferenceResults, limbsIndex);
+      //         isProperForm = isPostureCorrect();
+      //         doReps(inferenceResults);
+      //       } else {
+      //         setState(() {
+      //           doneReps = 0;
+      //           doneSets++;
+      //           rest = true;
+      //           restTime = 30;
+      //         });
+      //       }
+      //     } else {
+      //       setState(() {
+      //         doneSets = 0;
+      //         doneReps = 0;
+      //         nextWorkout();
+      //         rest = true;
+      //         restTime = 60;
+      //       });
+      //     }
+      //   } else {
+      //     setState(() {
+      //       restTime = 0;
+      //       rest = false;
+      //     });
+      //   }
+      // });
+
+      if (!rest) {
+        if (handler.doneSets < sets) {
+          if (handler.doneReps < reps) {
+            handler.checkLimbs(inferenceResults, limbsIndex);
+            isProperForm = handler.isPostureCorrect();
+            handler.doReps(inferenceResults);
+            setState(() {
+              doneReps = handler.doneReps;
+              stage = handler.stage;
+              test_angle1 = handler.angle;
+            });
+          } else {
+            handler.doneReps = 0;
+            handler.doneSets++;
+            setState(() {
+              doneReps = handler.doneReps;
+              doneSets = handler.doneSets;
+              rest = true;
+              restTime = 30;
+            });
+          }
         } else {
-          limbs[limbsIndex][1] = false;
+          handler.doneSets = 0;
+          handler.doneReps = 0;
+          setState(() {
+            doneReps = handler.doneReps;
+            doneSets = handler.doneSets;
+            nextWorkout();
+            rest = true;
+            restTime = 60;
+          });
         }
-        limbsIndex += 1;
+      } else {
+        setState(() {
+          restTime = 0;
+          rest = false;
+        });
       }
     });
 
@@ -247,7 +399,7 @@ class _TestState extends State<Test> {
             Container(),
             Padding(
                 padding: EdgeInsets.fromLTRB(0, 0, 15, 0),
-                child: Text('Perform workoutss')),
+                child: Text('Perform workouts')),
             Image.asset('assets/img/shoulder_press_icon.png',
                 width: 35, height: 35)
           ],
@@ -278,13 +430,33 @@ class _TestState extends State<Test> {
             //     quarterTurns: 3,
             //     child: Image.memory(imageLib.encodeJpg(holder) as Uint8List))
           ),
-          Text(body_angle.toString(), style: TextStyle(fontSize: 30)),
+          Row(
+            children: [
+              Text(doneReps.toString(), style: TextStyle(fontSize: 30)),
+              SizedBox(
+                width: 10,
+              ),
+              Text(doneSets.toString(), style: TextStyle(fontSize: 30)),
+              SizedBox(
+                width: 10,
+              ),
+              Text(isProperForm.toString(), style: TextStyle(fontSize: 30)),
+              SizedBox(
+                width: 10,
+              ),
+              Text(stage.toString(), style: TextStyle(fontSize: 30)),
+              SizedBox(
+                width: 10,
+              ),
+              Text(test_angle1.toString(), style: TextStyle(fontSize: 30))
+            ],
+          ),
+          Text(test_angle2.toString(), style: TextStyle(fontSize: 30)),
           Row(
             children: [
               Text(exerciseName),
               Text(reps.toString()),
               Text(sets.toString()),
-              FloatingActionButton(onPressed: nextWorkout),
             ],
           )
         ],
