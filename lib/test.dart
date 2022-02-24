@@ -196,6 +196,8 @@ class _TestState extends State<Test> {
       handler = Exercises[exerciseName]!.handler;
       print(handler);
       handler.init();
+      limbs = handler.limbs;
+      targets = handler.targets;
     });
   }
 
