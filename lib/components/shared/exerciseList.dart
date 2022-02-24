@@ -15,12 +15,12 @@ Map<String, Exercise> Exercises = {
       exercise_displayName: "Front lateral raise",
       reps: 1,
       sets: 1,
-      handler: DumbellCurlHandler()),
+      handler: FrontLateralRaiseHandler()),
   "shoulder_press": Exercise(
       exercise_image: 'assets/img/card_shoulderpress.png',
       exercise_name: "shoulder_press",
       exercise_displayName: "Shoulder press",
       reps: 1,
       sets: 1,
-      handler: DumbellCurlHandler()),
+      handler: ShoulderPressHandler()),
 };
