@@ -6,6 +6,7 @@ class ExerciseHandler {
   late List<dynamic> targets;
 
   late bool isProperForm;
+  late bool restart;
   late int doneReps;
   late int doneSets;
 
@@ -71,7 +72,8 @@ class DumbellCurlHandler extends ExerciseHandler {
     doneReps = 0;
     doneSets = 0;
     angle = 0;
-    stage = "up";
+    stage = "start";
+    restart = true;
   }
 
   void doReps(var inferenceResults) {
@@ -87,13 +89,24 @@ class DumbellCurlHandler extends ExerciseHandler {
 
         print("TARGET ANGLE: " + angle.toString());
       }
-      if (angle < 35) {
-        stage = "down";
+      if (restart) {
+        if (angle > 150) {
+          stage = "up";
+          restart = false;
+        }
+      } else {
+        if (angle < 35) {
+          stage = "down";
+        }
+        if (angle > 150 && stage == "down") {
+          stage = "up";
+          doneReps += 1;
+        }
       }
-      if (angle > 150 && stage == "down") {
-        stage = "up";
-        doneReps += 1;
-      }
+    } else {
+      restart = true;
+      stage = "start";
+      print("restart");
     }
   }
 }
@@ -106,8 +119,8 @@ class FrontLateralRaiseHandler extends ExerciseHandler {
       [
         [5, 7, 9],
         false,
-        170,
-        185
+        165,
+        180
       ],
       [
         [5, 11, 13],
@@ -126,7 +139,8 @@ class FrontLateralRaiseHandler extends ExerciseHandler {
     doneReps = 0;
     doneSets = 0;
     angle = 0;
-    stage = "up";
+    stage = "start";
+    restart = true;
   }
 
   void doReps(var inferenceResults) {
@@ -142,13 +156,24 @@ class FrontLateralRaiseHandler extends ExerciseHandler {
 
         print("TARGET ANGLE: " + angle.toString());
       }
-      if (angle > 80) {
-        stage = "down";
+      if (restart) {
+        if (angle < 10) {
+          stage = "up";
+          restart = false;
+        }
+      } else {
+        if (angle > 80) {
+          stage = "down";
+        }
+        if (angle < 10 && stage == "down") {
+          stage = "up";
+          doneReps += 1;
+        }
       }
-      if (angle < 10 && stage == "down") {
-        stage = "up";
-        doneReps += 1;
-      }
+    } else {
+      restart = true;
+      stage = "start";
+      print("restart");
     }
   }
 }
@@ -215,7 +240,8 @@ class ShoulderPressHandler extends ExerciseHandler {
     doneReps = 0;
     doneSets = 0;
     angle = 0;
-    stage = "up";
+    stage = "start";
+    restart = true;
   }
 
   void doReps(var inferenceResults) {
@@ -284,13 +310,35 @@ class ShoulderPressHandler extends ExerciseHandler {
           " " +
           angle4.toString());
 
-      if (angle1 > 175 && angle3 > 175) {
-        stage = "down";
+      if (restart) {
+        if ((angle1 - 90) < 10 &&
+            (angle3 - 90) < 10 &&
+            (angle2 - 90) < 10 &&
+            (angle4 - 90) < 10) {
+          stage = "up";
+          restart = false;
+        }
+      } else {
+        if ((angle1 - angle2).abs() < 10 &&
+            (angle3 - angle4).abs() < 10 &&
+            (angle1 - angle3).abs() < 20) {
+          if (angle1 > 175 && angle3 > 175) {
+            stage = "down";
+          }
+          if (angle1 < 95 && angle3 < 95 && stage == "down") {
+            stage = "up";
+            doneReps += 1;
+          }
+        } else {
+          restart = true;
+          stage = "start";
+          print("restart");
+        }
       }
-      if (angle1 < 95 && angle3 < 95 && stage == "down") {
-        stage = "up";
-        doneReps += 1;
-      }
+    } else {
+      restart = true;
+      stage = "start";
+      print("restart");
     }
   }
 }
