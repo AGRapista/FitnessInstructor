@@ -60,57 +60,11 @@ class _TestState extends State<Test> {
 
   // POSE AND FORM VALIDATION
   bool isProperForm = false;
-  List<dynamic> limbs2 = [
-    [
-      [7, 5, 11],
-      false,
-      5,
-      25
-    ],
-    // [
-    //   [8, 6, 12],
-    //   false,
-    //   5,
-    //   25
-    // ],
-    [
-      [5, 11, 13],
-      false,
-      170,
-      180
-    ],
-    // [
-    //   [6, 12, 14],
-    //   false,
-    //   160,
-    //   180
-    // ],
-    // [
-    //   [11, 13, 15],
-    //   false,
-    //   170,
-    //   180
-    // ],
-    // [
-    //   [12, 14, 16],
-    //   false,
-    //   160,
-    //   180
-    // ],
-  ];
-
-  List<dynamic> targets = [
-    [
-      [5, 7, 9],
-      false
-    ],
-    // [
-    //   [6, 8, 10],
-    //   false
-    // ],
-  ];
-
   List<dynamic> limbs = [];
+  List<dynamic> targets = [];
+
+  // HAS WORKOUTS TODAY
+  bool hasWorkoutsToday = false;
 
   @override
   void initState() {
@@ -119,17 +73,23 @@ class _TestState extends State<Test> {
   }
 
   void initAsync() async {
-    isolate = IsolateUtils();
-    await isolate.start();
-    classifier = Classifier();
-    classifier.loadModel();
-    loadCamera();
-
     jsonHandler = JsonHandler();
     await jsonHandler.init();
 
     jsonHandler.workoutfileExists ? jsonHandler.fetchWorkouts() : null;
     jsonHandler.weekFileExists ? fetchDayWorkout() : null;
+
+    if (jsonHandler.weekSchedule[jsonHandler.dayToday] == "") {
+      hasWorkoutsToday = false;
+    } else {
+      hasWorkoutsToday = true;
+
+      isolate = IsolateUtils();
+      await isolate.start();
+      classifier = Classifier();
+      classifier.loadModel();
+      loadCamera();
+    }
 
     setState(() {
       limbs = handler.limbs;
@@ -138,30 +98,7 @@ class _TestState extends State<Test> {
   }
 
   void fetchDayWorkout() {
-    dayToday = DateTime.now();
-    switch (dayToday.weekday) {
-      case 1:
-        dayToday = "Mon";
-        break;
-      case 2:
-        dayToday = "Tues";
-        break;
-      case 3:
-        dayToday = "Wed";
-        break;
-      case 4:
-        dayToday = "Thurs";
-        break;
-      case 5:
-        dayToday = "Fri";
-        break;
-      case 6:
-        dayToday = "Sat";
-        break;
-      case 7:
-        dayToday = "Sun";
-        break;
-    }
+    dayToday = jsonHandler.fetchDayToday();
     jsonHandler.fetchWeekSchedule();
 
     print(dayToday);
@@ -223,64 +160,6 @@ class _TestState extends State<Test> {
     });
   }
 
-  bool isPostureCorrect() {
-    for (var limb in limbs) {
-      if (limb[1] == false) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  void checkLimbs(var inferenceResults, var limbsIndex) {
-    print("______________________________________");
-    for (var limb in limbs) {
-      var A = limb[0][0];
-      var B = limb[0][1];
-      var C = limb[0][2];
-      List<int> pointA = [inferenceResults[A][0], inferenceResults[A][1]];
-      List<int> pointB = [inferenceResults[B][0], inferenceResults[B][1]];
-      List<int> pointC = [inferenceResults[C][0], inferenceResults[C][1]];
-      var angle = getAngle(pointA, pointB, pointC);
-      print(limb[0].toString() + " | " + angle.toString());
-      if (angle >= limb[2] && angle <= limb[3]) {
-        limbs[limbsIndex][1] = true;
-      } else {
-        limbs[limbsIndex][1] = false;
-      }
-      limbsIndex += 1;
-    }
-  }
-
-  void doReps(var inferenceResults) {
-    if (isProperForm) {
-      var angle = 0.0;
-      for (var target in targets) {
-        var A = target[0][0];
-        var B = target[0][1];
-        var C = target[0][2];
-        List<int> pointA = [inferenceResults[A][0], inferenceResults[A][1]];
-        List<int> pointB = [inferenceResults[B][0], inferenceResults[B][1]];
-        List<int> pointC = [inferenceResults[C][0], inferenceResults[C][1]];
-        angle = getAngle(pointA, pointB, pointC);
-        setState(() {
-          test_angle1 = angle;
-        });
-      }
-      if (angle < 30) {
-        setState(() {
-          stage = "down";
-        });
-      }
-      if (angle > 160 && stage == "down") {
-        setState(() {
-          stage = "up";
-          doneReps += 1;
-        });
-      }
-    }
-  }
-
   void createIsolate(CameraImage imageStream) async {
     if (predicting == true) {
       return;
@@ -297,11 +176,6 @@ class _TestState extends State<Test> {
       inferences = inferenceResults;
       predicting = false;
       initialized = true;
-
-      // TEST CODE FOR BODY ANGLE
-      // List<int> pointA = [inferenceResults[5][0], inferenceResults[5][1]];
-      // List<int> pointB = [inferenceResults[11][0], inferenceResults[11][1]];
-      // List<int> pointC = [inferenceResults[11][0] + 50, 0];
 
       List<int> pointA = [inferenceResults[7][0], inferenceResults[7][1]];
       List<int> pointB = [inferenceResults[5][0], inferenceResults[5][1]];
@@ -380,8 +254,6 @@ class _TestState extends State<Test> {
         });
       }
     });
-
-    // print(inferenceResults.toString());
   }
 
   Future<List<dynamic>> inference(IsolateData isolateData) async {
@@ -408,61 +280,84 @@ class _TestState extends State<Test> {
         ),
         backgroundColor: Colors.black,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(5),
-            child: initialized
-                ? Container(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    width: MediaQuery.of(context).size.width,
-                    child: CustomPaint(
-                      foregroundPainter: RenderLandmarks(inferences, limbs),
-                      child: !cameraController!.value.isInitialized
-                          ? Container()
-                          : AspectRatio(
-                              aspectRatio: cameraController!.value.aspectRatio,
-                              child: CameraPreview(cameraController!),
-                            ),
-                    ),
-                  )
-                : Container(),
+      body: hasWorkoutsToday
+          ? Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(5),
+                  child: initialized
+                      ? Container(
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          width: MediaQuery.of(context).size.width,
+                          child: CustomPaint(
+                            foregroundPainter:
+                                RenderLandmarks(inferences, limbs),
+                            child: !cameraController!.value.isInitialized
+                                ? Container()
+                                : AspectRatio(
+                                    aspectRatio:
+                                        cameraController!.value.aspectRatio,
+                                    child: CameraPreview(cameraController!),
+                                  ),
+                          ),
+                        )
+                      : Container(),
 
-            // RotatedBox(
-            //     quarterTurns: 3,
-            //     child: Image.memory(imageLib.encodeJpg(holder) as Uint8List))
-          ),
-          Row(
-            children: [
-              Text(doneReps.toString(), style: TextStyle(fontSize: 30)),
-              SizedBox(
-                width: 10,
+                  // RotatedBox(
+                  //     quarterTurns: 3,
+                  //     child: Image.memory(imageLib.encodeJpg(holder) as Uint8List))
+                ),
+                Row(
+                  children: [
+                    Center(
+                        child: Image.asset(
+                      imgUrl,
+                      height: 100,
+                      width: 150,
+                    )),
+                    DefaultTextStyle(
+                      textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 25, color: Colors.black),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text("Reps: " + doneReps.toString()),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(" / " + reps.toString())
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text("Sets: " + doneSets.toString()),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(" / " + sets.toString())
+                            ],
+                          ),
+                          Text(stage == "start"
+                              ? "Starting pose."
+                              : stage == "up"
+                                  ? "Flexion"
+                                  : "Extension")
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              ],
+            )
+          : Center(
+              child: Text(
+                "No workouts today. Rest or assign one\nfor this day of the week: " +
+                    jsonHandler.fetchDayToday() +
+                    "day",
+                textAlign: TextAlign.center,
               ),
-              Text(doneSets.toString(), style: TextStyle(fontSize: 30)),
-              SizedBox(
-                width: 10,
-              ),
-              Text(isProperForm.toString(), style: TextStyle(fontSize: 30)),
-              SizedBox(
-                width: 10,
-              ),
-              Text(stage.toString(), style: TextStyle(fontSize: 30)),
-              SizedBox(
-                width: 10,
-              ),
-              Text(test_angle1.toString(), style: TextStyle(fontSize: 30))
-            ],
-          ),
-          Text(test_angle2.toString(), style: TextStyle(fontSize: 30)),
-          Row(
-            children: [
-              Text(exerciseName),
-              Text(reps.toString()),
-              Text(sets.toString()),
-            ],
-          )
-        ],
-      ),
+            ),
     );
   }
 }
