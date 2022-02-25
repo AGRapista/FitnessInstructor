@@ -16,6 +16,8 @@ class JsonHandler {
   late bool workoutfileExists;
   late bool weekFileExists;
 
+  late var dayToday;
+
   List<dynamic> workouts = [];
   Map<String, dynamic> weekSchedule = {};
 
@@ -148,6 +150,34 @@ class JsonHandler {
     // weekJsonFile.delete();
 
     // printWrapped(json.decode(weekJsonFile.readAsStringSync()));
+  }
+
+  String fetchDayToday() {
+    dayToday = DateTime.now();
+    switch (dayToday.weekday) {
+      case 1:
+        dayToday = "Mon";
+        break;
+      case 2:
+        dayToday = "Tues";
+        break;
+      case 3:
+        dayToday = "Wed";
+        break;
+      case 4:
+        dayToday = "Thurs";
+        break;
+      case 5:
+        dayToday = "Fri";
+        break;
+      case 6:
+        dayToday = "Sat";
+        break;
+      case 7:
+        dayToday = "Sun";
+        break;
+    }
+    return dayToday;
   }
 
   void printWrapped(String text) {
