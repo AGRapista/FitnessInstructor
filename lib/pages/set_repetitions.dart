@@ -147,7 +147,9 @@ class _SetRepetitionsState extends State<SetRepetitions> {
                                 OrderWorkout(selected_cards: selected_cards),
                             transitionDuration: Duration(seconds: 0),
                             reverseTransitionDuration: Duration.zero),
-                      ),
+                      ).then((value) {
+                        setState(() {});
+                      }),
                   backgroundColor: Colors.black,
                   child: Center(
                       child: Image.asset(
