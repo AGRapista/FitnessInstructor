@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../test.dart';
+import '../shared/json_handler.dart';
 
 class continue_button extends StatefulWidget {
   continue_button({Key? key}) : super(key: key);
@@ -9,6 +10,23 @@ class continue_button extends StatefulWidget {
 }
 
 class _continue_buttonState extends State<continue_button> {
+  late JsonHandler jsonHandler;
+
+  @override
+  void initState() {
+    super.initState();
+    initAsync();
+  }
+
+  void initAsync() async {
+    jsonHandler = JsonHandler();
+    await jsonHandler.init();
+    setState(() {
+      jsonHandler.weekFileExists ? jsonHandler.fetchWeekSchedule() : null;
+      jsonHandler.fetchDayToday();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
