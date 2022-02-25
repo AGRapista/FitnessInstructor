@@ -246,26 +246,6 @@ class ShoulderPressHandler extends ExerciseHandler {
 
   void doReps(var inferenceResults) {
     if (isPostureCorrect()) {
-      // for (var target in targets) {
-      //   var A = target[0][0];
-      //   var B = target[0][1];
-      //   var C = target[0][2];
-      //   List<int> pointA = [inferenceResults[A][0], inferenceResults[A][1]];
-      //   List<int> pointB = [inferenceResults[B][0], inferenceResults[B][1]];
-      //   List<int> pointC = [inferenceResults[C][0], inferenceResults[C][1]];
-      //   angle = getAngle(pointA, pointB, pointC);
-
-      //   print("TARGET ANGLE: " + angle.toString());
-      // }
-      // if (angle < 10) {
-      //   stage = "up";
-      // }
-      // if (angle > 80 && stage == "up") {
-      //   stage = "down";
-      //   doneReps += 1;
-      // }
-
-      // right arm
       var a = 5;
       var b = 7;
       var c = 9;
@@ -311,18 +291,18 @@ class ShoulderPressHandler extends ExerciseHandler {
           angle4.toString());
 
       if (restart) {
-        if ((angle1 - 90) < 10 &&
-            (angle3 - 90) < 10 &&
-            (angle2 - 90) < 10 &&
-            (angle4 - 90) < 10) {
+        if ((angle1 - 90).abs() < 15 &&
+            (angle3 - 90).abs() < 15 &&
+            (angle2 - 90).abs() < 15 &&
+            (angle4 - 90).abs() < 15) {
           stage = "up";
           restart = false;
         }
       } else {
-        if ((angle1 - angle2).abs() < 10 &&
-            (angle3 - angle4).abs() < 10 &&
-            (angle1 - angle3).abs() < 20) {
-          if (angle1 > 175 && angle3 > 175) {
+        if ((angle1 - angle2).abs() < 40 &&
+            (angle3 - angle4).abs() < 40 &&
+            (angle1 - angle3).abs() < 40) {
+          if (angle1 > 170 && angle3 > 170) {
             stage = "down";
           }
           if (angle1 < 95 && angle3 < 95 && stage == "down") {
